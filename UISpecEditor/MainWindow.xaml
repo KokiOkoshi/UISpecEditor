@@ -5,8 +5,107 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UISpecEditor"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="{Binding FileName}" Height="450" Width="800">
+    <Window.DataContext>
+        <local:MainWindowViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type local:UISpec}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Expander Header="パラメーター定義">
+                    <ContentPresenter Grid.Row="0" Content="{Binding ParameterDefinition}"/>
+                </Expander>
+                <GroupBox Grid.Row="1" Header="UI仕様">
+                    <ScrollViewer>
+                        <ContentPresenter Content="{Binding ViewSpec}"/>
+                    </ScrollViewer>
+                </GroupBox>
+            </Grid>
+        </DataTemplate>
 
+        <DataTemplate DataType="{x:Type local:ParameterDefinition}">
+            <StackPanel Orientation="Vertical">
+                <StackPanel.Resources>
+                    <CollectionViewSource x:Key="StatesSource" Source="{Binding States}" />
+                    <CollectionViewSource x:Key="TriggerCategorySource" Source="{Binding TriggerCategories}"/>
+                </StackPanel.Resources>
+                <GroupBox Header="状態リスト">
+                    <DataGrid ItemsSource="{Binding Source={StaticResource StatesSource}}"  HorizontalAlignment="Left"/>
+                </GroupBox>
+                <GroupBox Header="トリガーリスト">
+                    <DataGrid ItemsSource="{Binding Source={StaticResource TriggerCategorySource}}"  HorizontalAlignment="Left"/>
+                </GroupBox>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:ViewSpec}">
+            <ItemsControl>
+                <TreeViewItem Header="{Binding}">
+                    <TreeViewItem.HeaderTemplate>
+                        <DataTemplate DataType="{x:Type local:ViewSpec}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="UI要素名 : "/>
+                                <TextBox Text="{Binding Name}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TreeViewItem.HeaderTemplate>
+                    <TreeViewItem.Items>
+                        <TreeViewItem Header="状態仕様" ItemsSource="{Binding StateSpecs}">
+                            <TreeViewItem.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </TreeViewItem.ItemsPanel>
+                            <TreeViewItem.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="追加" Command="{Binding AddStateSpecCommand}"/>
+                                </ContextMenu>
+                            </TreeViewItem.ContextMenu>
+                        </TreeViewItem>
+                        <TreeViewItem Header="子UI仕様" ItemsSource="{Binding ViewSpecs}">
+                            <TreeViewItem.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="追加" Command="{Binding AddViewSpecCommand}"/>
+                                </ContextMenu>
+                            </TreeViewItem.ContextMenu>
+                        </TreeViewItem>
+                    </TreeViewItem.Items>
+                </TreeViewItem>
+            </ItemsControl>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:StateSpec}">
+            <GroupBox Header="{Binding}">
+                <GroupBox.HeaderTemplate>
+                    <DataTemplate DataType="{x:Type local:StateSpec}">
+                        <TextBox Text="{Binding Name}"/>
+                    </DataTemplate>
+                </GroupBox.HeaderTemplate>
+                <StackPanel Orientation="Vertical">
+                    <GroupBox Header="デザイン仕様">
+                        <DataGrid ItemsSource="{Binding DesignSpecs}" HorizontalAlignment="Left"/>
+                    </GroupBox>
+                    <GroupBox Header="操作仕様">
+                        <DataGrid ItemsSource="{Binding BehaviorSpecs}" HorizontalAlignment="Left"/>
+                    </GroupBox>
+                </StackPanel>
+            </GroupBox>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Command="{Binding NewCommand}"/>
+                <MenuItem Header="_Open" Command="{Binding OpenCommand}"/>
+                <MenuItem Header="_Save" Command="{Binding SaveAsCommand}"/>
+            </MenuItem>
+        </Menu>
+        <ContentPresenter Grid.Row="1" Content="{Binding UiSpec}"/>
     </Grid>
 </Window>
